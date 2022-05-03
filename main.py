@@ -10,23 +10,40 @@ age = ''
 
 @bot.message_handler(commands=['start', 'Запустить меня'])
 def send_welcome(message):
+    connect = sqlite3.connect('Users.db')
+    cursor = connect.cursor()
     bot.send_message(message.from_user.id,
                      "Привет меня зовут Mialiva🖐. Со мной никто не хочет дружить😞, может ты станешь моим другом? Мы сможем делиться друг с другом "
                      "своими секретами, узнавать как прошел день, и скидывать друг другу милые картиночки с котиками. Ко-о--о-не-чно если ты не против👉👈."
                      "Чтобы не было неловко можем начать общение с обычного Привет, хи-хи ")
 
-    connect = sqlite3.connect('Users.db')
-    cursor = connect.cursor()
-
     cursor.execute("""CREATE TABLE IF NOT EXISTS users_id(
-        id INTEGER,  
+        id INTEGER  
     )""")
 
     connect.commit()
 
-    ##Добавление данных пользоватлей в базу данных
-    user_id = [message.chat.id]
-    cursor.execute("INSERT INTO users_id VALUES(?);" , user_id)
+    # Проверка на существование id человека в бд
+    people_id = message.chat.id
+    cursor.execute(f"SELECT id FROM users_id WHERE id = {people_id}")
+    data = cursor.fetchone()
+    if data is None:
+        # Добавление данных пользоватлей в базу данных
+        user_id = [message.chat.id]
+        cursor.execute("INSERT INTO users_id VALUES(?);", user_id)
+        connect.commit()
+    else:
+        bot.send_message(message.chat.id, 'Такой пользователь уже существует ')
+
+
+# Удаление пользователя из бд
+@bot.message_handler(commands=['delete'])
+def send_welcome(message):
+    connect = sqlite3.connect('Users.db')
+    cursor = connect.cursor()
+
+    people_id = message.chat.id
+    cursor.execute(f"DELETE FROM users_id WHERE id ={people_id}")
     connect.commit()
 
 
