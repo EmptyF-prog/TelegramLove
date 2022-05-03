@@ -14,10 +14,12 @@ def init_db(force: bool = False):
     "Проверка что нужные таблицы  существуют, в другом случае создать их"
 
     conn = get_connection()
+
     c = conn.cursor()
 
     # Информация о пользователе
     # Сообщения от пользователей
+
     if force:
         c.execute('DROP TABLE IF EXISTS user_message')
 
@@ -38,6 +40,7 @@ def add_message(user_id: int, text: str):
     c = conn.cursor()
     c.execute('INSERT INTO user_message (user_id, text) VALUES (?,?)', (user_id, text))
     conn.commit()
+
 
 if __name__ == '__main__':
     init_db()
